@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ot_settings_tab",
+  "ot_configuration",
+  "default_break_time",
+  "default_work_hours"
+ ],
+ "fields": [
+  {
+   "fieldname": "ot_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overtime Settings"
+  },
+  {
+   "fieldname": "ot_configuration",
+   "fieldtype": "Table",
+   "label": "OT Configuration",
+   "options": "OT Configuration"
+  },
+  {
+   "default": "1.5",
+   "fieldname": "default_break_time",
+   "fieldtype": "Float",
+   "label": "Default Break Time (Hours)"
+  },
+  {
+   "default": "8.0",
+   "fieldname": "default_work_hours",
+   "fieldtype": "Float",
+   "label": "Default Work Hours (Hours)"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Attendance Plus",
+ "name": "Attendance Plus Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

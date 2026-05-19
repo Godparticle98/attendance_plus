@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_type",
+  "ot_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Type",
+   "options": "Employment Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ot_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "OT Type",
+   "options": "Daily Basis",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Attendance Plus",
+ "name": "OT Configuration",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

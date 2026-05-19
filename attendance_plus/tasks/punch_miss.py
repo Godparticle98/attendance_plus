@@ -186,3 +186,47 @@ def _notify_punch_miss(emp, date, miss_type):
             """,
             now=False
         )
+
+def send_manager_summary_emails():
+    """
+    Daily scheduled task to send HR/Managers a summary of unresolved punch misses.
+    """
+    managers = frappe.db.sql("""
+        SELECT DISTINCT approver 
+        FROM `tabAttendance Regularization`
+        WHERE status = 'Pending Approval'
+        AND docstatus = 1
+    """, as_dict=True)
+
+    for row in managers:
+        approver = row.approver
+        if not approver: continue
+        
+        pending = frappe.get_all(
+            "Attendance Regularization",
+            filters={"approver": approver, "status": "Pending Approval", "docstatus": 1},
+            fields=["employee_name", "date", "regularization_type"]
+        )
+
+        if not pending: continue
+
+        rows_html = "".join([
+            f"<tr><td>{p.employee_name}</td><td>{p.date}</td><td>{p.regularization_type}</td></tr>"
+            for p in pending
+        ])
+
+        frappe.sendmail(
+            recipients=[approver],
+            subject="Daily Summary: Pending Attendance Regularizations",
+            message=f"""
+                <p>Dear Manager,</p>
+                <p>You have <b>{len(pending)}</b> pending attendance regularizations requiring your action:</p>
+                <table border="1" style="border-collapse: collapse; width: 100%; text-align: left;" cellpadding="5">
+                    <tr><th>Employee</th><th>Date</th><th>Type</th></tr>
+                    {rows_html}
+                </table>
+                <br>
+                <p><a href="/app/attendance-regularization">Click here to view all</a></p>
+            """,
+            now=False
+        )

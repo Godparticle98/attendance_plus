@@ -29,7 +29,7 @@ def get_attendance_data(date=None, department=None, status_filter=None):
     )
 
     rows = []
-    summary = {"total": len(employees), "present": 0, "absent": 0, "late": 0, "punch_miss": 0}
+    summary = {"total": len(employees), "present": 0, "absent": 0, "late": 0, "punch_miss": 0, "total_ot": 0.0}
 
     for emp in employees:
         row = _build_employee_row(emp, date)
@@ -51,6 +51,8 @@ def get_attendance_data(date=None, department=None, status_filter=None):
             summary["present"] += 1
         elif s == "Punch Miss":
             summary["punch_miss"] += 1
+            
+        summary["total_ot"] += row.get("overtime", 0.0)
 
     return {"summary": summary, "rows": rows}
 
@@ -75,7 +77,7 @@ def _build_employee_row(emp, date):
     attendance = frappe.db.get_value(
         "Attendance",
         {"employee": emp.name, "attendance_date": date, "docstatus": 1},
-        ["status", "in_time", "out_time", "late_entry"],
+        ["status", "in_time", "out_time", "late_entry", "custom_overtime_hours"],
         as_dict=True
     )
 
@@ -112,7 +114,8 @@ def _build_employee_row(emp, date):
         "in_time": _fmt_time(in_checkin.time) if in_checkin else None,
         "out_time": _fmt_time(out_checkin.time) if out_checkin else None,
         "source": source,
-        "status": status
+        "status": status,
+        "overtime": attendance.custom_overtime_hours if attendance and attendance.custom_overtime_hours else 0.0
     }
 
 

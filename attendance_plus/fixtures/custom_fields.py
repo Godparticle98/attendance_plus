@@ -71,6 +71,14 @@ CUSTOM_FIELDS = {
             "insert_after": "custom_permission_type",
             "read_only": 1,
             "module": "Attendance Plus"
+        },
+        {
+            "fieldname": "custom_overtime_hours",
+            "label": "Overtime Hours",
+            "fieldtype": "Float",
+            "insert_after": "working_hours",
+            "read_only": 1,
+            "module": "Attendance Plus"
         }
     ]
 }

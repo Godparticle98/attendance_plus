@@ -38,24 +38,27 @@ frappe.pages["attendance-dashboard"].on_page_load = function (wrapper) {
 		<div id="att-dashboard" style="padding: 20px;">
 
 			<!-- Summary Cards -->
-			<div id="summary-cards" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:28px;">
-				${make_card("cnt-total", "Total", "#2490EF")}
-				${make_card("cnt-present", "Present", "#28a745")}
-				${make_card("cnt-absent", "Absent", "#dc3545")}
-				${make_card("cnt-late", "Late Entry", "#fd7e14")}
-				${make_card("cnt-punch-miss", "Punch Miss", "#6f42c1")}
+			<div id="summary-cards" style="display:grid;grid-template-columns:repeat(6,1fr);gap:15px;margin-bottom:24px;">
+				${make_card("cnt-total", "Total Employees", "var(--text-color)")}
+				${make_card("cnt-present", "Present", "var(--text-color)")}
+				${make_card("cnt-absent", "Absent", "var(--text-color)")}
+				${make_card("cnt-late", "Late Entry", "var(--text-color)")}
+				${make_card("cnt-punch-miss", "Punch Miss", "var(--text-color)")}
+				${make_card("cnt-total-ot", "Total OT (Hrs)", "var(--text-color)")}
 			</div>
 
 			<!-- Attendance Table -->
-			<div style="background:var(--card-bg);border-radius:8px;border:1px solid var(--border-color);margin-bottom:28px;">
-				<table class="table table-bordered" style="margin:0;">
-					<thead style="background:var(--subtle-fg);">
+			<div style="background:var(--card-bg);border-radius:8px;border:1px solid var(--border-color);margin-bottom:28px;box-shadow:var(--shadow-sm);overflow:hidden;">
+				<div style="padding:15px 20px;border-bottom:1px solid var(--border-color);font-weight:600;font-size:16px;">Daily Log</div>
+				<table class="table table-bordered" style="margin:0;border-style:hidden;font-size:13px;">
+					<thead style="background:var(--subtle-bg);color:var(--text-muted);font-weight:normal;">
 						<tr>
 							<th>Employee</th>
 							<th>Department</th>
 							<th>Check-In</th>
 							<th>Check-Out</th>
 							<th>Source</th>
+							<th>OT (Hrs)</th>
 							<th>Status</th>
 							<th>Action</th>
 						</tr>
@@ -69,10 +72,10 @@ frappe.pages["attendance-dashboard"].on_page_load = function (wrapper) {
 			</div>
 
 			<!-- Pending Approvals -->
-			<h5 style="margin-bottom:14px;">⏳ Pending Approvals</h5>
-			<div style="background:var(--card-bg);border-radius:8px;border:1px solid var(--border-color);">
-				<table class="table table-bordered" style="margin:0;">
-					<thead style="background:var(--subtle-fg);">
+			<div style="background:var(--card-bg);border-radius:8px;border:1px solid var(--border-color);box-shadow:var(--shadow-sm);overflow:hidden;">
+				<div style="padding:15px 20px;border-bottom:1px solid var(--border-color);font-weight:600;font-size:16px;">Pending Approvals</div>
+				<table class="table table-bordered" style="margin:0;border-style:hidden;font-size:13px;">
+					<thead style="background:var(--subtle-bg);color:var(--text-muted);font-weight:normal;">
 						<tr>
 							<th>Employee</th>
 							<th>Type</th>
@@ -124,6 +127,7 @@ frappe.pages["attendance-dashboard"].on_page_load = function (wrapper) {
 		$("#cnt-absent .count").text(s.absent || 0);
 		$("#cnt-late .count").text(s.late || 0);
 		$("#cnt-punch-miss .count").text(s.punch_miss || 0);
+		$("#cnt-total-ot .count").text(s.total_ot ? s.total_ot.toFixed(1) : "0.0");
 	}
 
 	function render_attendance_table(rows) {
@@ -138,15 +142,16 @@ frappe.pages["attendance-dashboard"].on_page_load = function (wrapper) {
 					<small style="color:var(--text-muted)">${row.employee}</small>
 				</td>
 				<td>${row.department || "-"}</td>
-				<td>${row.in_time || '<span style="color:#dc3545">Missing</span>'}</td>
-				<td>${row.out_time || '<span style="color:#dc3545">Missing</span>'}</td>
+				<td>${row.in_time || '<span style="color:var(--text-muted)">-</span>'}</td>
+				<td>${row.out_time || '<span style="color:var(--text-muted)">-</span>'}</td>
 				<td><small style="color:var(--text-muted)">${row.source || "-"}</small></td>
+				<td><b>${row.overtime ? row.overtime.toFixed(1) : "-"}</b></td>
 				<td>${badge_for(row.status)}</td>
 				<td>${
 					["Punch Miss", "Absent"].includes(row.status)
 						? `<a href="/app/attendance-regularization/new-attendance-regularization-1?employee=${row.employee}&date=${row.date}" 
-							style="font-size:12px;">+ Regularize</a>`
-						: "-"
+							class="btn btn-xs btn-default" style="font-size:11px;">Regularize</a>`
+						: ""
 				}</td>
 			</tr>
 		`).join(""));
@@ -225,10 +230,10 @@ frappe.pages["attendance-dashboard"].on_page_load = function (wrapper) {
 
 	function make_card(id, label, color) {
 		return `
-			<div id="${id}" style="background:var(--card-bg);border-radius:10px;
-				padding:20px;text-align:center;border:1px solid var(--border-color);">
-				<div class="count" style="font-size:32px;font-weight:700;color:${color};">-</div>
-				<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${label}</div>
+			<div id="${id}" style="background:var(--card-bg);border-radius:8px;
+				padding:20px;text-align:center;border:1px solid var(--border-color);box-shadow:var(--shadow-sm);">
+				<div class="count" style="font-size:28px;font-weight:600;color:${color};">-</div>
+				<div style="font-size:13px;color:var(--text-muted);margin-top:6px;font-weight:500;">${label}</div>
 			</div>`;
 	}
 

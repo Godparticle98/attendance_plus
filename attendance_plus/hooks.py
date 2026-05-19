@@ -32,7 +32,8 @@ scheduler_events = {
         ],
     },
     "daily": [
-        "attendance_plus.tasks.attendance_processor.process_attendance"
+        "attendance_plus.tasks.attendance_processor.process_attendance",
+        "attendance_plus.tasks.punch_miss.send_manager_summary_emails"
     ],
 }
 
@@ -40,6 +41,9 @@ scheduler_events = {
 doc_events = {
     "Employee Checkin": {
         "after_insert": "attendance_plus.tasks.attendance_processor.on_new_checkin",
+    },
+    "Attendance": {
+        "before_submit": "attendance_plus.tasks.overtime_processor.calculate_overtime"
     }
 }
 
