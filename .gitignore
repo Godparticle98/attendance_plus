@@ -53,3 +53,9 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+.editorconfig
+.eslintrc
+.pre-commit-config.yaml
+.github
+.gitignore
