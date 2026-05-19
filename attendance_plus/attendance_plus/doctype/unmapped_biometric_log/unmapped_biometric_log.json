@@ -1,0 +1,26 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["biometric_user_id","device","first_seen","status"],
+ "fields": [
+  {"fieldname":"biometric_user_id","fieldtype":"Data","label":"Biometric User ID","reqd":1,"in_list_view":1},
+  {"fieldname":"device","fieldtype":"Link","label":"Device","options":"Biometric Device","in_list_view":1},
+  {"fieldname":"first_seen","fieldtype":"Datetime","label":"First Seen","in_list_view":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"\nPending\nMapped\nIgnored","default":"Pending","in_list_view":1}
+ ],
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Attendance Plus",
+ "name": "Unmapped Biometric Log",
+ "owner": "Administrator",
+ "permissions": [
+  {"read":1,"write":1,"create":1,"delete":1,"role":"HR Manager"},
+  {"read":1,"role":"HR User"}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

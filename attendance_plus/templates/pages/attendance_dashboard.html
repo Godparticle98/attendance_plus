@@ -1,0 +1,269 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Attendance Dashboard{% endblock %}
+
+{% block head_include %}
+<style>
+  .att-dashboard { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .att-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: flex-end; }
+  .att-filters select, .att-filters input {
+    border: 1px solid #d1d8dd; border-radius: 6px;
+    padding: 6px 12px; font-size: 13px; background: #fff;
+  }
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .card {
+    background: #fff; border-radius: 10px; padding: 18px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-align: center;
+  }
+  .card .count { font-size: 32px; font-weight: 700; }
+  .card .label { font-size: 12px; color: #6c757d; margin-top: 4px; }
+  .card.present .count { color: #28a745; }
+  .card.absent .count { color: #dc3545; }
+  .card.late .count { color: #fd7e14; }
+  .card.punch-miss .count { color: #6f42c1; }
+  .card.total .count { color: #007bff; }
+
+  .att-table { width: 100%; border-collapse: collapse; background: #fff;
+    border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .att-table th { background: #f5f7fa; padding: 12px 14px; text-align: left;
+    font-size: 12px; color: #6c757d; font-weight: 600; border-bottom: 1px solid #e9ecef; }
+  .att-table td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+  .att-table tr:last-child td { border-bottom: none; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-present { background: #d4edda; color: #155724; }
+  .badge-absent { background: #f8d7da; color: #721c24; }
+  .badge-late { background: #fff3cd; color: #856404; }
+  .badge-punch-miss { background: #e8d5f5; color: #4a0080; }
+  .badge-half-day { background: #d1ecf1; color: #0c5460; }
+  .badge-leave { background: #e2e3e5; color: #383d41; }
+
+  .pending-section { margin-top: 36px; }
+  .pending-section h4 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .action-btn {
+    padding: 4px 12px; border-radius: 5px; font-size: 12px;
+    border: none; cursor: pointer; font-weight: 500;
+  }
+  .btn-approve { background: #28a745; color: #fff; margin-right: 4px; }
+  .btn-reject { background: #dc3545; color: #fff; }
+  .refresh-btn { padding: 7px 18px; border-radius: 6px; border: 1px solid #007bff;
+    background: #007bff; color: #fff; font-size: 13px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="att-dashboard">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h2 style="margin:0;">Attendance Dashboard</h2>
+    <button class="refresh-btn" onclick="loadDashboard()">⟳ Refresh</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="att-filters">
+    <div>
+      <label style="font-size:12px;display:block;margin-bottom:4px;">Date</label>
+      <input type="date" id="filter-date" />
+    </div>
+    <div>
+      <label style="font-size:12px;display:block;margin-bottom:4px;">Department</label>
+      <select id="filter-dept"><option value="">All Departments</option></select>
+    </div>
+    <div>
+      <label style="font-size:12px;display:block;margin-bottom:4px;">Status</label>
+      <select id="filter-status">
+        <option value="">All</option>
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+        <option value="Punch Miss">Punch Miss</option>
+        <option value="Late">Late</option>
+        <option value="On Leave">On Leave</option>
+      </select>
+    </div>
+    <button class="refresh-btn" onclick="loadDashboard()" style="margin-top:auto;">Apply</button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards" id="summary-cards">
+    <div class="card total"><div class="count" id="cnt-total">-</div><div class="label">Total Employees</div></div>
+    <div class="card present"><div class="count" id="cnt-present">-</div><div class="label">Present</div></div>
+    <div class="card absent"><div class="count" id="cnt-absent">-</div><div class="label">Absent</div></div>
+    <div class="card late"><div class="count" id="cnt-late">-</div><div class="label">Late Entry</div></div>
+    <div class="card punch-miss"><div class="count" id="cnt-punch-miss">-</div><div class="label">Punch Miss</div></div>
+  </div>
+
+  <!-- Attendance Table -->
+  <table class="att-table" id="att-table">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Department</th>
+        <th>Check-In</th>
+        <th>Check-Out</th>
+        <th>Source</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="att-table-body">
+      <tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Pending Approvals -->
+  <div class="pending-section">
+    <h4>⏳ Pending Approvals</h4>
+    <table class="att-table" id="pending-table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Request Type</th>
+          <th>Reason</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="pending-table-body">
+        <tr><td colspan="6" style="text-align:center;padding:30px;color:#999;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Set today's date as default
+  document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
+
+  function loadDashboard() {
+    const date = document.getElementById('filter-date').value;
+    const dept = document.getElementById('filter-dept').value;
+    const status = document.getElementById('filter-status').value;
+
+    loadAttendanceData(date, dept, status);
+    loadPendingApprovals();
+  }
+
+  function loadAttendanceData(date, dept, status) {
+    const tbody = document.getElementById('att-table-body');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#999;">Loading...</td></tr>';
+
+    frappe.call({
+      method: 'attendance_plus.api.dashboard.get_attendance_data',
+      args: { date, department: dept, status_filter: status },
+      callback: function(r) {
+        if (r.message) {
+          updateSummary(r.message.summary);
+          renderAttendanceTable(r.message.rows);
+        }
+      }
+    });
+  }
+
+  function updateSummary(s) {
+    document.getElementById('cnt-total').textContent = s.total || 0;
+    document.getElementById('cnt-present').textContent = s.present || 0;
+    document.getElementById('cnt-absent').textContent = s.absent || 0;
+    document.getElementById('cnt-late').textContent = s.late || 0;
+    document.getElementById('cnt-punch-miss').textContent = s.punch_miss || 0;
+  }
+
+  function renderAttendanceTable(rows) {
+    const tbody = document.getElementById('att-table-body');
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#999;">No records found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(row => `
+      <tr>
+        <td><b>${row.employee_name}</b><br><small style="color:#999">${row.employee}</small></td>
+        <td>${row.department || '-'}</td>
+        <td>${row.in_time || '<span style="color:#dc3545">Missing</span>'}</td>
+        <td>${row.out_time || '<span style="color:#dc3545">Missing</span>'}</td>
+        <td><span style="font-size:11px;color:#6c757d">${row.source || '-'}</span></td>
+        <td>${badgeFor(row.status)}</td>
+        <td>
+          ${row.status === 'Punch Miss' || row.status === 'Absent'
+            ? `<a href="/app/attendance-regularization/new?employee=${row.employee}&date=${row.date}" style="font-size:12px;">+ Regularize</a>`
+            : '-'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function badgeFor(status) {
+    const map = {
+      'Present': 'present', 'Absent': 'absent',
+      'Late': 'late', 'Punch Miss': 'punch-miss',
+      'Half Day': 'half-day', 'On Leave': 'leave'
+    };
+    const cls = map[status] || 'absent';
+    return `<span class="badge badge-${cls}">${status || 'Unknown'}</span>`;
+  }
+
+  function loadPendingApprovals() {
+    frappe.call({
+      method: 'attendance_plus.api.dashboard.get_pending_approvals',
+      callback: function(r) {
+        const tbody = document.getElementById('pending-table-body');
+        const rows = r.message || [];
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">No pending approvals</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(row => `
+          <tr>
+            <td><b>${row.employee_name}</b></td>
+            <td>${row.doctype_label}</td>
+            <td>${row.date}</td>
+            <td>${row.request_type}</td>
+            <td>${row.reason || '-'}</td>
+            <td>
+              <button class="action-btn btn-approve" onclick="handleApproval('${row.doctype}', '${row.name}', 'approve')">Approve</button>
+              <button class="action-btn btn-reject" onclick="handleApproval('${row.doctype}', '${row.name}', 'reject')">Reject</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    });
+  }
+
+  function handleApproval(doctype, name, action) {
+    const remarks = prompt(`Remarks for ${action} (optional):`);
+    if (remarks === null) return; // Cancelled
+
+    const method_map = {
+      'Attendance Permission': {
+        approve: 'attendance_plus.doctype.attendance_permission.attendance_permission.approve_permission',
+        reject: 'attendance_plus.doctype.attendance_permission.attendance_permission.reject_permission'
+      },
+      'Attendance Regularization': {
+        approve: 'attendance_plus.doctype.attendance_regularization.attendance_regularization.approve_regularization',
+        reject: 'attendance_plus.doctype.attendance_regularization.attendance_regularization.reject_regularization'
+      }
+    };
+
+    frappe.call({
+      method: method_map[doctype][action],
+      args: { doc_name: name, remarks: remarks || '' },
+      callback: function(r) {
+        frappe.show_alert({ message: `${action}d successfully`, indicator: action === 'approve' ? 'green' : 'red' });
+        loadPendingApprovals();
+      }
+    });
+  }
+
+  // Load departments for filter
+  frappe.call({
+    method: 'frappe.client.get_list',
+    args: { doctype: 'Department', fields: ['name'], limit: 100 },
+    callback: function(r) {
+      const sel = document.getElementById('filter-dept');
+      (r.message || []).forEach(d => {
+        sel.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+      });
+    }
+  });
+
+  // Initial load
+  loadDashboard();
+</script>
+{% endblock %}
