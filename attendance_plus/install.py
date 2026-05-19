@@ -27,112 +27,40 @@ def after_install():
 def _create_workspace():
     print("Setting up Workspace...")
 
-    if frappe.db.exists("Workspace", "Attendance Plus"):
-        print("  Workspace already exists, skipping.")
-        return
-
-    ws = frappe.new_doc("Workspace")
-    ws.title = "Attendance Plus"
-    ws.name = "Attendance Plus"
-    ws.label = "Attendance Plus"
-    ws.module = "Attendance Plus"
-    ws.is_standard = 1
-    ws.app = "attendance_plus"
-    ws.public = 1
-    ws.icon = "fa fa-clock-o"
-    ws.color = "#2490EF"
-    ws.category = "Modules"
-
-    # ERPNext 16 uses a JSON content field for workspace layout
-    ws.content = """[
-        {
-            "id": "section_1",
-            "type": "header",
-            "data": {
-                "text": "Attendance Plus",
-                "level": 3,
-                "col": 12
-            }
-        },
-        {
-            "id": "section_2",
-            "type": "spacer",
-            "data": {"col": 12}
-        }
-    ]"""
-
-    ws.insert(ignore_permissions=True)
-    print("  Workspace created.")
-
-    # Add shortcuts
-    shortcuts = [
-        {
-            "label": "Attendance Dashboard",
-            "type": "URL",
-            "url": "/attendance_dashboard",
-            "color": "#2490EF",
-            "icon": "fa fa-bar-chart"
-        },
-        {
-            "label": "Biometric Device",
-            "type": "DocType",
-            "link_to": "Biometric Device",
-            "color": "#36414C",
-            "icon": "fa fa-microchip"
-        },
-        {
-            "label": "Attendance Permission",
-            "type": "DocType",
-            "link_to": "Attendance Permission",
-            "color": "#F8814F",
-            "icon": "fa fa-check-circle"
-        },
-        {
-            "label": "Attendance Regularization",
-            "type": "DocType",
-            "link_to": "Attendance Regularization",
-            "color": "#A9E6A0",
-            "icon": "fa fa-pencil-square-o"
-        },
-        {
-            "label": "Unmapped Biometric Log",
-            "type": "DocType",
-            "link_to": "Unmapped Biometric Log",
-            "color": "#FFC4C4",
-            "icon": "fa fa-exclamation-triangle"
-        },
-        {
-            "label": "Employee Checkin",
-            "type": "DocType",
-            "link_to": "Employee Checkin",
-            "color": "#98D85B",
-            "icon": "fa fa-sign-in"
-        },
+    # Reload Number Cards
+    number_cards = [
+        "absent_today",
+        "pending_regularizations",
+        "present_today",
+        "total_active_employees",
+        "total_ot_hours_today"
     ]
-
-    for i, sc in enumerate(shortcuts):
+    for card in number_cards:
         try:
-            shortcut = frappe.new_doc("Workspace Shortcut")
-            shortcut.parenttype = "Workspace"
-            shortcut.parentfield = "shortcuts"
-            shortcut.parent = "Attendance Plus"
-            shortcut.label = sc["label"]
-            shortcut.type = sc["type"]
-            shortcut.color = sc.get("color", "#2490EF")
-            shortcut.icon = sc.get("icon", "")
-            shortcut.idx = i + 1
-
-            if sc["type"] == "DocType":
-                shortcut.link_to = sc["link_to"]
-            elif sc["type"] == "URL":
-                shortcut.url = sc["url"]
-
-            shortcut.insert(ignore_permissions=True)
-            print(f"  Shortcut added: {sc['label']}")
+            frappe.reload_doc("attendance_plus", "number_card", card, force=True)
+            print(f"  Number Card reloaded: {card}")
         except Exception as e:
-            print(f"  Shortcut skipped ({sc['label']}): {e}")
+            print(f"  Failed to reload Number Card {card}: {e}")
 
-    print("  Workspace setup done.")
+    # Reload Reports
+    reports = [
+        "daily_overtime_summary",
+        "punch_reconciliation"
+    ]
+    for report in reports:
+        try:
+            frappe.reload_doc("attendance_plus", "report", report, force=True)
+            print(f"  Report reloaded: {report}")
+        except Exception as e:
+            print(f"  Failed to reload Report {report}: {e}")
+
+    # Reload Workspace
+    try:
+        frappe.reload_doc("attendance_plus", "workspace", "attendance_plus", force=True)
+        print("  Workspace reloaded from fixtures.")
+    except Exception as e:
+        print(f"  Failed to reload Workspace: {e}")
+
 
 
 def _create_custom_fields():
@@ -243,22 +171,4 @@ def _create_custom_fields():
 
 
 def before_uninstall():
-    """Clean up on uninstall"""
-    print("\n=== Attendance Plus Cleanup ===")
-
-    # Remove workspace
-    if frappe.db.exists("Workspace", "Attendance Plus"):
-        frappe.delete_doc("Workspace", "Attendance Plus", ignore_permissions=True)
-        print("  Workspace removed.")
-
-    # Remove custom fields
-    custom_fields = frappe.get_all("Custom Field", filters={"module": "Attendance Plus"})
-    for cf in custom_fields:
-        try:
-            frappe.delete_doc("Custom Field", cf.name, ignore_permissions=True)
-            print(f"  Removed custom field: {cf.name}")
-        except Exception:
-            pass
-
-    frappe.db.commit()
-    print("=== Cleanup Complete ===\n")
+    pass
