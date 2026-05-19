@@ -168,3 +168,10 @@ def get_pending_approvals():
         })
 
     return pending
+
+
+def has_permission():
+    """Used by add_to_apps_screen to control visibility"""
+    return "HR Manager" in frappe.get_roles() or \
+           "HR User" in frappe.get_roles() or \
+           "System Manager" in frappe.get_roles()

@@ -6,18 +6,27 @@ app_version = "0.0.1"
 app_email = "admin@yourcompany.com"
 app_license = "MIT"
 
-# Install / Uninstall hooks
+# Install / Uninstall
 after_install = "attendance_plus.install.after_install"
 before_uninstall = "attendance_plus.install.before_uninstall"
+
+# Frappe v16 desktop icon
+add_to_apps_screen = [
+    {
+        "name": "attendance_plus",
+        "logo": "/assets/attendance_plus/images/logo.svg",
+        "title": "Attendance Plus",
+        "route": "/app/attendance-dashboard",
+        "has_permission": "attendance_plus.api.dashboard.has_permission"
+    }
+]
 
 # Scheduled Tasks
 scheduler_events = {
     "cron": {
-        # Pull biometric punches every 5 minutes
         "*/5 * * * *": [
             "attendance_plus.biometric.sync.pull_biometric_logs"
         ],
-        # Detect punch misses 30 min after each hour
         "30 * * * *": [
             "attendance_plus.tasks.punch_miss.detect_punch_miss"
         ],
@@ -34,26 +43,10 @@ doc_events = {
     }
 }
 
-# Custom fields added to existing doctypes
+# Fixtures — synced on migrate, never deleted as orphan
 fixtures = [
     {
-        "doctype": "Custom Field",
-        "filters": [
-            ["module", "=", "Attendance Plus"]
-        ]
-    },
-    {
-        "doctype": "Workflow",
-        "filters": [
-            ["module", "=", "Attendance Plus"]
-        ]
-    }
-]
-
-# Web pages
-website_route_rules = [
-    {
-        "from_route": "/attendance-portal",
-        "to_route": "attendance_portal"
+        "doctype": "Workspace",
+        "filters": [["name", "=", "Attendance Plus"]]
     }
 ]

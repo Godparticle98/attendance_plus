@@ -1,0 +1,75 @@
+{
+ "content": "[{\"id\":\"header_1\",\"type\":\"header\",\"data\":{\"text\":\"Attendance\",\"level\":4,\"col\":12}},{\"id\":\"sc1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance Dashboard\",\"col\":3}},{\"id\":\"sc2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Biometric Device\",\"col\":3}},{\"id\":\"sc3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance Permission\",\"col\":3}},{\"id\":\"sc4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance Regularization\",\"col\":3}},{\"id\":\"header_2\",\"type\":\"header\",\"data\":{\"text\":\"Logs\",\"level\":4,\"col\":12}},{\"id\":\"sc5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Checkin\",\"col\":3}},{\"id\":\"sc6\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unmapped Biometric Log\",\"col\":3}}]",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "Workspace",
+ "docstatus": 0,
+ "icon": "attendance",
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Attendance Plus",
+ "module": "Attendance Plus",
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Attendance Plus",
+ "owner": "Administrator",
+ "public": 1,
+ "app": "attendance_plus",
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "icon": "date-time",
+   "idx": 1,
+   "label": "Attendance Dashboard",
+   "link_to": "attendance-dashboard",
+   "name": "Attendance Dashboard",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "icon": "setting",
+   "idx": 2,
+   "label": "Biometric Device",
+   "link_to": "Biometric Device",
+   "name": "Biometric Device",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "icon": "check",
+   "idx": 3,
+   "label": "Attendance Permission",
+   "link_to": "Attendance Permission",
+   "name": "Attendance Permission",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "icon": "edit",
+   "idx": 4,
+   "label": "Attendance Regularization",
+   "link_to": "Attendance Regularization",
+   "name": "Attendance Regularization",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "icon": "list",
+   "idx": 5,
+   "label": "Employee Checkin",
+   "link_to": "Employee Checkin",
+   "name": "Employee Checkin",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "icon": "warning",
+   "idx": 6,
+   "label": "Unmapped Biometric Log",
+   "link_to": "Unmapped Biometric Log",
+   "name": "Unmapped Biometric Log",
+   "type": "DocType"
+  }
+ ],
+ "title": "Attendance Plus"
+}
