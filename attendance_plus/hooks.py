@@ -16,8 +16,7 @@ add_to_apps_screen = [
         "name": "attendance_plus",
         "logo": "/assets/attendance_plus/images/logo.svg",
         "title": "Attendance Plus",
-        "route": "/app/attendance-dashboard",
-        "has_permission": "attendance_plus.api.dashboard.has_permission"
+        "route": "/app/attendance-plus"
     }
 ]
 
