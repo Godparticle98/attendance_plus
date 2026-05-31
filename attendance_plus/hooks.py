@@ -16,7 +16,7 @@ add_to_apps_screen = [
         "name": "attendance_plus",
         "logo": "/assets/attendance_plus/images/logo.svg",
         "title": "Attendance Plus",
-        "route": "/app/attendance-plus"
+        "route": "/attendance_plus_dashboard"
     }
 ]
 
@@ -32,7 +32,8 @@ scheduler_events = {
     },
     "daily": [
         "attendance_plus.tasks.attendance_processor.process_attendance",
-        "attendance_plus.tasks.punch_miss.send_manager_summary_emails"
+        "attendance_plus.tasks.punch_miss.send_manager_summary_emails",
+        "attendance_plus.tasks.mail_reports.send_daily_attendance_digest"
     ],
 }
 
@@ -43,6 +44,10 @@ doc_events = {
     },
     "Attendance": {
         "before_submit": "attendance_plus.tasks.overtime_processor.calculate_overtime"
+    },
+    "Salary Slip": {
+        "before_validate": "attendance_plus.tasks.salary_slip_processor.process_salary_slip_ot",
+        "before_save": "attendance_plus.tasks.salary_slip_processor.process_salary_slip_ot"
     }
 }
 

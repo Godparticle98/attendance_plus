@@ -80,6 +80,17 @@ CUSTOM_FIELDS = {
             "read_only": 1,
             "module": "Attendance Plus"
         }
+    ],
+    "Salary Slip": [
+        {
+            "fieldname": "custom_ot_hours",
+            "label": "OT Hours",
+            "fieldtype": "Float",
+            "insert_after": "total_working_days",
+            "read_only": 1,
+            "module": "Attendance Plus",
+            "description": "Total Overtime Hours retrieved from Attendance records for this payroll period."
+        }
     ]
 }
 
