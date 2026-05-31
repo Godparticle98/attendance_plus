@@ -126,17 +126,26 @@ const syncRes = createResource({
 })
 
 const fetchMetrics = async () => {
-  const data = await dashboardRes.fetch()
-  if (data) {
-    metrics.value = data
+  try {
+    const data = await dashboardRes.fetch()
+    if (data) {
+      metrics.value = data.message || data
+    }
+  } catch (e) {
+    console.error("Failed to fetch metrics", e)
   }
 }
 
 const syncData = async () => {
   isSyncing.value = true
-  await syncRes.fetch()
-  await fetchMetrics()
-  isSyncing.value = false
+  try {
+    await syncRes.fetch()
+    await fetchMetrics()
+  } catch (e) {
+    console.error("Sync failed", e)
+  } finally {
+    isSyncing.value = false
+  }
 }
 
 onMounted(() => {
