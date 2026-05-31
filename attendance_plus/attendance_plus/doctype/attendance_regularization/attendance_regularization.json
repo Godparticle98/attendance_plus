@@ -64,8 +64,7 @@
    "fieldtype": "Link",
    "label": "Approver",
    "options": "User",
-   "fetch_from": "employee.reports_to",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "regularization_type",

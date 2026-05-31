@@ -74,9 +74,8 @@
    "fieldtype": "Link",
    "label": "Approver",
    "options": "User",
-   "fetch_from": "employee.reports_to",
-   "reqd": 1,
-   "description": "Auto-fetched from Employee's Reports To"
+   "read_only": 1,
+   "description": "Auto-fetched from Employee's Reports To upon saving"
   },
   {
    "fieldname": "section_time",
