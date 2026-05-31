@@ -27,13 +27,6 @@ export default defineConfig({
   build: {
     outDir: '../attendance_plus/public/frontend',
     emptyOutDir: true,
-    target: 'es2015',
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]'
-      }
-    }
+    target: 'es2015'
   }
 })
