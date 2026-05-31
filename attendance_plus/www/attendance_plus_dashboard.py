@@ -16,6 +16,7 @@ def get_context(context):
     <script>
         window.frappe = window.frappe || {{}};
         window.frappe.csrf_token = '{csrf_token}';
+        window.csrf_token = '{csrf_token}';
     </script>
     """
     
