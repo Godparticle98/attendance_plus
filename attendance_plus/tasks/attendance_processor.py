@@ -23,7 +23,7 @@ def process_attendance():
         SELECT e.name, e.employee_name, e.department
         FROM `tabEmployee` e
         WHERE e.status = 'Active'
-        AND (e.shift IS NULL OR e.shift = '')
+        AND (e.default_shift IS NULL OR e.default_shift = '')
         AND NOT EXISTS (
             SELECT 1 FROM `tabShift Assignment` sa
             WHERE sa.employee = e.name
