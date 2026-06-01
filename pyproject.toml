@@ -1,13 +1,19 @@
-[build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
 [project]
 name = "attendance_plus"
-version = "0.0.1"
+authors = [
+    { name = "Your Company", email = "admin@yourcompany.com"}
+]
 description = "Unified biometric + app attendance management for ERPNext"
 requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
 dependencies = []
 
-[project.optional-dependencies]
-dev = []
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.dev-dependencies]
+
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0,<=17.0.0-dev"
