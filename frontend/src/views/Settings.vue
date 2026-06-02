@@ -1,17 +1,82 @@
 <template>
-  <div>
-    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
-    <p class="text-gray-500 mt-1 mb-8">Configure break, overtime rules, and global app settings.</p>
+  <div class="space-y-8 max-w-2xl">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
+      <p class="text-gray-500 mt-1">Configure break, overtime rules, and global app settings.</p>
+    </div>
     
-    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-96 items-center justify-center text-gray-400">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <p class="text-lg">Application settings configuration coming soon...</p>
+    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 flex flex-col space-y-6">
+      <div v-if="successMsg" class="p-4 bg-green-100 text-green-800 rounded-lg shadow">
+        {{ successMsg }}
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Default Break Time (Hours)</label>
+          <input 
+            type="number" 
+            step="0.5" 
+            v-model="formData.default_break_time" 
+            class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Default Work Hours (Hours)</label>
+          <input 
+            type="number" 
+            step="0.5" 
+            v-model="formData.default_work_hours" 
+            class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+      </div>
+      
+      <div class="pt-4 border-t border-gray-100">
+        <Button variant="solid" @click="saveSettings" :loading="isSaving">
+          Save Settings
+        </Button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { Button, createResource } from 'frappe-ui'
+
+const formData = ref({
+  default_break_time: 1.5,
+  default_work_hours: 8.0
+})
+const isSaving = ref(false)
+const successMsg = ref('')
+
+const settingsRes = createResource({
+  url: 'attendance_plus.api.settings.get_settings',
+  method: 'GET',
+  auto: true,
+  onSuccess: (data) => {
+    formData.value.default_break_time = data.default_break_time || 1.5
+    formData.value.default_work_hours = data.default_work_hours || 8.0
+  }
+})
+
+const saveRes = createResource({
+  url: 'attendance_plus.api.settings.save_settings'
+})
+
+const saveSettings = async () => {
+  isSaving.value = true
+  successMsg.value = ''
+  try {
+    await saveRes.submit({ data: JSON.stringify(formData.value) })
+    successMsg.value = 'Settings saved successfully!'
+    setTimeout(() => { successMsg.value = '' }, 3000)
+  } catch (e) {
+    console.error("Save failed", e)
+  } finally {
+    isSaving.value = false
+  }
+}
 </script>

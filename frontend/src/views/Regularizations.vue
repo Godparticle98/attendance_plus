@@ -1,16 +1,49 @@
 <template>
-  <div>
-    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Approve Regularizations</h1>
-    <p class="text-gray-500 mt-1 mb-8">Review and approve missing punches.</p>
+  <div class="space-y-8 h-full flex flex-col">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Approve Regularizations</h1>
+      <p class="text-gray-500 mt-1">Review and approve missing punches.</p>
+    </div>
     
-    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-96 items-center justify-center text-gray-400">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-      </svg>
-      <p class="text-lg">Regularization approvals module coming soon...</p>
+    <div class="flex-grow bg-white rounded-xl shadow-md border border-gray-100 flex flex-col overflow-hidden">
+      <ListView
+        :columns="[
+          { label: 'Employee', key: 'employee_name', width: '20%' },
+          { label: 'Date', key: 'date', width: '15%' },
+          { label: 'Type', key: 'regularization_type', width: '25%' },
+          { label: 'Reason', key: 'reason', width: '25%' },
+          { label: 'Action', key: 'action', width: '15%' }
+        ]"
+        :rows="regsRes.data || []"
+        row-key="name"
+        :selectable="false"
+        class="h-full"
+      >
+        <template #cell(action)="{ row }">
+          <Button size="sm" variant="solid" @click="approve(row.name)">
+            Approve
+          </Button>
+        </template>
+      </ListView>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ListView, Button, createResource } from 'frappe-ui'
+
+const regsRes = createResource({
+  url: 'attendance_plus.api.regularization.get_pending_regularizations',
+  method: 'GET',
+  auto: true
+})
+
+const approveRes = createResource({
+  url: 'attendance_plus.api.regularization.approve_regularization'
+})
+
+const approve = async (name) => {
+  await approveRes.submit({ name })
+  regsRes.fetch() // Refresh list after approval
+}
 </script>

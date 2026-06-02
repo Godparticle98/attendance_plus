@@ -6,7 +6,16 @@
         <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Attendance Dashboard</h1>
         <p class="text-gray-500 mt-1">Live metrics and check-in status for today.</p>
       </div>
-      <div class="flex space-x-3">
+      <div class="flex space-x-3 items-center">
+        <select 
+          v-model="dateFilter" 
+          @change="fetchDashboard"
+          class="border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+        >
+          <option value="Today">Today (Live)</option>
+          <option value="This Week">This Week</option>
+          <option value="This Month">This Month</option>
+        </select>
         <Button variant="solid" @click="syncData" :loading="isSyncing" icon-left="refresh-cw">
           Sync Now
         </Button>
@@ -49,26 +58,23 @@
     <!-- Live Attendance List -->
     <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 flex flex-col h-96">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800">Live Check-ins Today</h2>
-        <span class="flex h-3 w-3 relative">
+        <h2 class="text-xl font-bold text-gray-800">{{ dateFilter === 'Today' ? 'Live Check-ins Today' : 'Employee Work Hours (' + dateFilter + ')' }}</h2>
+        <span v-if="dateFilter === 'Today'" class="flex h-3 w-3 relative">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
         </span>
       </div>
       
-      <div class="flex-grow overflow-auto">
+      <div class="flex-grow overflow-hidden">
         <ListView
-          :columns="[
-            { label: 'Employee', key: 'employee_name', width: '30%' },
-            { label: 'Status', key: 'status', width: '30%' },
-            { label: 'First In', key: 'in_time', width: '20%' },
-            { label: 'Last Out', key: 'out_time', width: '20%' }
-          ]"
+          :columns="listColumns"
           :rows="(dashboardRes.data && dashboardRes.data.live_attendance) ? dashboardRes.data.live_attendance : []"
           row-key="employee_name"
+          :selectable="false"
+          class="h-full"
         >
           <template #cell(status)="{ row }">
-            <span 
+            <span v-if="row.status !== '-'"
               class="px-2 py-1 rounded-full text-xs font-semibold"
               :class="{
                 'bg-green-100 text-green-800': row.status === 'Present',
@@ -78,6 +84,7 @@
             >
               {{ row.status }}
             </span>
+            <span v-else>-</span>
           </template>
         </ListView>
       </div>
@@ -86,15 +93,39 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Button, ListView, createResource } from 'frappe-ui'
 
 const isSyncing = ref(false)
+const dateFilter = ref('Today')
 
 const dashboardRes = createResource({
   url: 'attendance_plus.api.dashboard.get_dashboard_data',
-  method: 'GET', // Prevents CSRF issues for fetching data
-  auto: true
+  method: 'GET',
+  auto: true,
+  params: { filter_type: dateFilter.value }
+})
+
+const fetchDashboard = () => {
+  dashboardRes.update({ params: { filter_type: dateFilter.value } })
+  dashboardRes.fetch()
+}
+
+const listColumns = computed(() => {
+  if (dateFilter.value === 'Today') {
+    return [
+      { label: 'Employee', key: 'employee_name', width: '30%' },
+      { label: 'Status', key: 'status', width: '30%' },
+      { label: 'First In', key: 'in_time', width: '20%' },
+      { label: 'Last Out', key: 'out_time', width: '20%' }
+    ]
+  } else {
+    return [
+      { label: 'Employee', key: 'employee_name', width: '40%' },
+      { label: 'Total Work Hours', key: 'working_hours', width: '30%' },
+      { label: 'Total Overtime', key: 'overtime_hours', width: '30%' }
+    ]
+  }
 })
 
 const syncRes = createResource({
